@@ -12,8 +12,10 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->lineEditZp->setText("331800");
 
     relTypeJob = new DbRelation(QString("select n.lid, n.fnam from wire_rab_nams as n "
-                                        "inner join wire_tarifs('"+QDate::currentDate().toString("yyyy-MM-dd")+"') as t on t.lid=n.lid order by n.fnam"),0,1,this);
-
+                                        "inner join wire_tarifs('"+QDate::currentDate().toString("yyyy-MM-dd")+"') as t on t.lid=n.lid "
+                                        "inner join wire_rab_liter as l on l.id = n.id "
+                                        "where l.id_ed = 1 "
+                                        "order by n.fnam"),0,1,this);
     modelProd = new ModelProd(this);
     ui->tableViewProd->setModel(modelProd);
 
@@ -30,7 +32,7 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->tableViewNorm->setColumnHidden(1,true);
     ui->tableViewNorm->setColumnHidden(2,true);
     ui->tableViewNorm->setColumnHidden(3,true);
-    ui->tableViewNorm->setColumnWidth(4,380);
+    ui->tableViewNorm->setColumnWidth(4,400);
 
     connect(ui->dateEditBeg,SIGNAL(dateChanged(QDate)),this,SLOT(updProd()));
     connect(ui->dateEditEnd,SIGNAL(dateChanged(QDate)),this,SLOT(updProd()));
@@ -108,6 +110,7 @@ void MainWidget::paste()
         if (!lastError.isEmpty()){
             QMessageBox::critical(this,tr("Error"),lastError,QMessageBox::Cancel);
         }
+        modelProd->updState();
         modelNorm->select();
     }
 }
