@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "modelprod.h"
 #include "db/dbtablemodel.h"
+#include "olap/cubewidget.h"
 
 namespace Ui {
 class MainWidget;
@@ -23,12 +24,17 @@ private:
     DbTableModel *modelNorm;
     DbRelation *relTypeJob;
     QVector<qlonglong> buf;
+    bool ready();
 
 private slots:
     void updProd();
     void updNorm(QModelIndex ind);
     void copy();
     void paste();
+    void repNorm();
+    void repFact();
+    void repNormPF();
+    void repFactPF();
 };
 
 #endif // MAINWIDGET_H

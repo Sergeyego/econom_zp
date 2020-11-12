@@ -44,6 +44,23 @@ QVariant ModelProd::data(const QModelIndex &item, int role) const
     return QSqlQueryModel::data(item,role);
 }
 
+bool ModelProd::ready()
+{
+    bool ok=true;
+    for (int i=0; i<rowCount(); i++){
+        QString s=this->data(this->index(i,0),Qt::EditRole).toString();
+        s+=":";
+        s+=this->data(this->index(i,1),Qt::EditRole).toString();
+        s+=":";
+        s+=this->data(this->index(i,2),Qt::EditRole).toString();
+        ok=ok && exList.contains(s);
+        if (!ok){
+            break;
+        }
+    }
+    return ok;
+}
+
 void ModelProd::updState()
 {
     QSqlQuery query;

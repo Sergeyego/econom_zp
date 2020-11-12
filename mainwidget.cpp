@@ -9,7 +9,9 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->dateEditBeg->setDate(QDate::currentDate().addDays(-QDate::currentDate().day()+1));
     ui->dateEditEnd->setDate(QDate::currentDate());
     ui->lineEditZp->setValidator(new QDoubleValidator(0,1000000000,2,this));
-    ui->lineEditZp->setText("331800");
+    ui->lineEditZpPF->setValidator(new QDoubleValidator(0,1000000000,2,this));
+    ui->lineEditZp->setText("500000");
+    ui->lineEditZpPF->setText("200000");
 
     relTypeJob = new DbRelation(QString("select n.lid, n.fnam from wire_rab_nams as n "
                                         "inner join wire_tarifs('"+QDate::currentDate().toString("yyyy-MM-dd")+"') as t on t.lid=n.lid "
@@ -40,6 +42,10 @@ MainWidget::MainWidget(QWidget *parent) :
     connect(modelNorm,SIGNAL(sigUpd()),modelProd,SLOT(updState()));
     connect(ui->pushButtonCopy,SIGNAL(clicked(bool)),this,SLOT(copy()));
     connect(ui->pushButtonPaste,SIGNAL(clicked(bool)),this,SLOT(paste()));
+    connect(ui->pushButtonNorm,SIGNAL(clicked(bool)),this,SLOT(repNorm()));
+    connect(ui->pushButtonFact,SIGNAL(clicked(bool)),this,SLOT(repFact()));
+    connect(ui->pushButtonNormPF,SIGNAL(clicked(bool)),this,SLOT(repNormPF()));
+    connect(ui->pushButtonFactPF,SIGNAL(clicked(bool)),this,SLOT(repFactPF()));
 
     updProd();
 }
@@ -47,6 +53,15 @@ MainWidget::MainWidget(QWidget *parent) :
 MainWidget::~MainWidget()
 {
     delete ui;
+}
+
+bool MainWidget::ready()
+{
+    bool ok=modelProd->ready();
+    if (!ok){
+        QMessageBox::information(this,QString::fromUtf8("Предупреждение"),QString::fromUtf8("Не для всех марок указаны виды работ!"),QMessageBox::Ok);
+    }
+    return ok;
 }
 
 void MainWidget::updProd()
@@ -112,5 +127,53 @@ void MainWidget::paste()
         }
         modelProd->updState();
         modelNorm->select();
+    }
+}
+
+void MainWidget::repNorm()
+{
+    if (ready()){
+        CubeWidget *w = new CubeWidget(31);
+        w->setRange(ui->dateEditBeg->date(),ui->dateEditEnd->date(),false);
+        w->setAttribute(Qt::WA_DeleteOnClose);
+        w->show();
+    }
+}
+
+void MainWidget::repFact()
+{
+    if (ready()){
+        CubeWidget *w = new CubeWidget(31);
+        w->setWindowTitle("Фактический расчет заработной платы на производство проволоки, руб");
+        QString sum=ui->lineEditZp->text();
+        sum=sum.replace(",",".");
+        w->setSum(sum.toDouble());
+        w->setRange(ui->dateEditBeg->date(),ui->dateEditEnd->date());
+        w->setAttribute(Qt::WA_DeleteOnClose);
+        w->show();
+    }
+}
+
+void MainWidget::repNormPF()
+{
+    if (ready()){
+        CubeWidget *w = new CubeWidget(32);
+        w->setRange(ui->dateEditBeg->date(),ui->dateEditEnd->date(),false);
+        w->setAttribute(Qt::WA_DeleteOnClose);
+        w->show();
+    }
+}
+
+void MainWidget::repFactPF()
+{
+    if (ready()){
+        CubeWidget *w = new CubeWidget(32);
+        w->setWindowTitle("Фактический расчет заработной платы на производство проволоки полуфабриката, руб");
+        QString sum=ui->lineEditZpPF->text();
+        sum=sum.replace(",",".");
+        w->setSum(sum.toDouble());
+        w->setRange(ui->dateEditBeg->date(),ui->dateEditEnd->date());
+        w->setAttribute(Qt::WA_DeleteOnClose);
+        w->show();
     }
 }

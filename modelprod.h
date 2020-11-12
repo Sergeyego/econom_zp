@@ -16,6 +16,7 @@ public:
     ModelProd(QObject *parent);
     void refresh(QDate beg, QDate end);
     QVariant data(const QModelIndex &item, int role) const;
+    bool ready();
 private:
     QStringList exList;
 public slots:
